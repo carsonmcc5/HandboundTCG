@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Browse the first 200 HandBound TCG cards." />
+  <title>HandBound TCG | Card Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="HandBound TCG home"><span class="brand-mark" aria-hidden="true">HB</span><span class="brand-name">HandBound <em>TCG</em></span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link active" href="archive.html">Card archive</a>
+        <a class="nav-link" href="deck-builder.html">Deck Builder</a>
+        <a class="nav-link coming-soon-link" href="about.html">About <span>soon</span></a>
+        <a class="nav-link coming-soon-link" href="store.html">Store <span>soon</span></a>
+      </nav>
+      <div class="header-status"><i></i> The First 200 <span>/</span> Online</div>
+    </header>
+
+    <main>
+      <section class="archive-page-heading">
+        <p class="eyebrow">Living database <span>·</span> The First 200</p>
+        <h1>Card <em>archive</em></h1>
+        <p>Search the complete card pool.<br />Find the pieces that fit your playstyle and deck.</p>
+      </section>
+      <section class="catalog-section archive-catalog" aria-labelledby="archive-heading">
+        <h2 class="sr-only" id="archive-heading">Card archive database</h2>
+        <div class="catalog-controls">
+          <label class="search-field"><span class="sr-only">Search cards</span><span class="search-icon" aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="Search by name or card number" autocomplete="off" /><kbd>/</kbd></label>
+          <div class="filter-group" role="group" aria-label="Filter cards by card kind"><button class="filter-button active" data-filter="all">All <b id="all-count">200</b></button><button class="filter-button" data-filter="creature">Creature <b id="creature-count">124</b></button><button class="filter-button" data-filter="spell">Spell <b id="spell-count">76</b></button></div>
+        </div>
+        <div class="catalog-subcontrols">
+          <div class="filter-selects">
+            <label class="select-filter">Rarity<select id="rarity-filter" aria-label="Filter by rarity"><option value="all">All rarities</option><option>Legendary</option><option>Epic</option><option>Rare</option><option>Uncommon</option><option>Common</option></select></label>
+            <label class="select-filter">Type<select id="type-filter" aria-label="Filter by card type"><option value="all">All types</option><option>Bug</option><option>Beast</option><option>Light</option><option>Dark</option></select></label>
+          </div>
+          <label class="sort-field">Sort<select id="sort-select" aria-label="Sort cards"><option value="number-asc">Card number</option><option value="cost-asc">Cost: low to high</option><option value="cost-desc">Cost: high to low</option><option value="atk-asc">ATK: low to high</option><option value="atk-desc">ATK: high to low</option><option value="def-asc">DEF: low to high</option><option value="def-desc">DEF: high to low</option></select></label>
+        </div>
+        <div class="results-bar"><span><strong id="result-count">200</strong> cards found</span><span class="results-set">THE FIRST 200 <i></i> 200 / 200</span></div>
+        <div class="card-grid" id="card-grid" aria-live="polite"></div>
+        <div class="empty-state" id="empty-state" hidden><span>∅</span><h3>No cards found</h3><p>Try another search or clear your filters.</p></div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>HANDBOUND TCG</span><span>The First 200 · 2026</span><span>Made for the table</span></footer>
+  </div>
+  <script src="cards-data.js"></script><script src="app.js"></script>
+</body>
+</html>

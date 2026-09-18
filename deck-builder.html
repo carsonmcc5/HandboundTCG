@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Build and save a HandBound TCG deck." />
+  <title>HandBound TCG | Deck Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="HandBound TCG home"><span class="brand-mark" aria-hidden="true">HB</span><span class="brand-name">HandBound <em>TCG</em></span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html">Home</a><a class="nav-link" href="archive.html">Card archive</a><a class="nav-link active" href="deck-builder.html">Deck Builder</a><a class="nav-link coming-soon-link" href="about.html">About <span>soon</span></a><a class="nav-link coming-soon-link" href="store.html">Store <span>soon</span></a>
+      </nav>
+      <div class="header-status"><i></i> Deck Lab <span>/</span> Beta</div>
+    </header>
+
+    <main>
+      <section class="builder-heading">
+        <p class="eyebrow">Build for the table <span>·</span> Local deck lab</p>
+        <h1>Make your<br /><em>deck</em></h1>
+        <p>Declare a type, fill your rarity slots, and save a deck to this device.</p>
+      </section>
+
+      <section class="builder-start" id="builder-start">
+        <div class="builder-step"><span>01</span><div><p class="eyebrow">Choose your foundation</p><h2>Create New Deck</h2><p>Every card in a deck must share its declared type.</p></div><button class="gold-button" id="create-deck-button">Create New Deck</button></div>
+        <div class="type-choice-grid" id="type-choice-grid" role="group" aria-label="Choose a deck type" hidden>
+          <button class="deck-type-button" data-deck-type="Bug"><span class="type-chip type-bug">Bug</span><small>50 cards</small></button>
+          <button class="deck-type-button" data-deck-type="Beast"><span class="type-chip type-beast">Beast</span><small>50 cards</small></button>
+          <button class="deck-type-button" data-deck-type="Light"><span class="type-chip type-light">Light</span><small>50 cards</small></button>
+          <button class="deck-type-button" data-deck-type="Dark"><span class="type-chip type-dark">Dark</span><small>50 cards</small></button>
+        </div>
+        <div class="saved-lobby"><div class="panel-heading"><span>Saved decks</span><span id="saved-lobby-count">0</span></div><div id="saved-decks-lobby" class="saved-decks"><p class="muted-note">Saved decks will appear here.</p></div></div>
+      </section>
+
+      <section class="deck-viewer" id="deck-viewer" hidden><div class="viewer-toolbar"><div><p class="eyebrow">Saved deck</p><h2 id="viewer-name">Untitled deck</h2><p id="viewer-type">Bug deck</p></div><div class="viewer-actions"><button class="outline-button" id="viewer-return-button">Back to decks</button><button class="gold-button" id="viewer-edit-button">Edit deck</button></div></div><div class="viewer-columns"><div><h3>Main deck <span id="viewer-main-count">0 / 25</span></h3><ol id="viewer-main-list"></ol></div><div><h3>Sideboard <span id="viewer-side-count">0 / 5</span></h3><ol id="viewer-side-list"></ol></div></div></section>
+
+      <section class="builder-workspace" id="builder-workspace" hidden>
+        <div class="builder-toolbar"><div><p class="eyebrow">Building a <span id="declared-type-label">Bug</span> deck</p><h2 id="deck-name-heading">Untitled deck</h2></div><div class="builder-actions"><button class="outline-button" id="editor-return-button">Back to decks</button><button class="outline-button" id="new-deck-button">New deck</button><button class="gold-button" id="save-deck-button">Save deck</button></div></div>
+        <div class="deck-layout">
+          <aside class="deck-panel deck-summary-panel"><div class="panel-heading"><span>Main deck</span><strong><b id="main-count">0</b> / 25</strong></div><label class="deck-name-field">Deck name<input id="deck-name-input" value="Untitled deck" maxlength="32" /></label><div class="slot-list" id="slot-list"></div><div class="deck-rule-note">Cards may fill their rarity slot or any higher open slot. No more than two copies of one card.</div><div class="sideboard-summary"><span>Sideboard</span><strong><b id="side-count">0</b> / 5</strong></div></aside>
+          <section class="deck-panel card-picker-panel"><div class="panel-heading"><span id="picker-heading">Choose cards</span><span id="picker-count">50 available</span></div><div class="picker-controls"><label class="search-field"><span class="sr-only">Search available cards</span><span class="search-icon" aria-hidden="true">⌕</span><input id="deck-search" type="search" placeholder="Search this type" autocomplete="off" /></label><select id="deck-rarity-filter" aria-label="Filter available cards by rarity"><option value="all">All rarities</option><option>Legendary</option><option>Epic</option><option>Rare</option><option>Uncommon</option><option>Common</option></select><select id="deck-kind-filter" aria-label="Filter available cards by kind"><option value="all">All cards</option><option value="creature">Creatures</option><option value="spell">Spells</option></select></div><div class="picker-list" id="picker-list"></div></section>
+        </div>
+        <div class="builder-message" id="builder-message" role="status" aria-live="polite"></div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>HANDBOUND TCG</span><span>Deck Lab · Beta</span><span>Made for the table</span></footer>
+  </div>
+  <script src="cards-data.js"></script><script src="deck-builder.js"></script>
+</body>
+</html>
