@@ -11,19 +11,23 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Shared site shell and searchable card archive. -->
   <div class="site-shell">
+    <!-- Global brand and navigation. -->
     <header class="site-header">
       <a class="brand" href="index.html" aria-label="HandBound TCG home"><span class="brand-mark" aria-hidden="true">HB</span><span class="brand-name">HandBound <em>TCG</em></span></a>
       <nav class="site-nav" aria-label="Main navigation">
         <a class="nav-link" href="index.html">Home</a>
         <a class="nav-link active" href="archive.html">Card archive</a>
         <a class="nav-link" href="deck-builder.html">Deck Builder</a>
+        <a class="nav-link" href="change-log.html">Change Log</a>
         <a class="nav-link coming-soon-link" href="about.html">About <span>soon</span></a>
         <a class="nav-link coming-soon-link" href="store.html">Store <span>soon</span></a>
       </nav>
       <div class="header-status"><i></i> The First 200 <span>/</span> Online</div>
     </header>
 
+    <!-- Archive heading, filters, results, and empty state. -->
     <main>
       <section class="archive-page-heading">
         <p class="eyebrow">Living database <span>·</span> The First 200</p>
@@ -50,6 +54,7 @@
     </main>
     <footer class="site-footer"><span>HANDBOUND TCG</span><span>The First 200 · 2026</span><span>Made for the table</span></footer>
   </div>
+  <!-- Load card data before the archive renderer. -->
   <script src="cards-data.js"></script><script src="app.js"></script>
 </body>
 </html>

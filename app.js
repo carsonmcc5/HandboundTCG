@@ -1,3 +1,4 @@
+// Shared card data and archive controls drive the searchable card catalog.
 const cards = window.handboundCards;
 
 const grid = document.querySelector("#card-grid");
@@ -7,13 +8,16 @@ const searchInput = document.querySelector("#search-input");
 const sortSelect = document.querySelector("#sort-select");
 const rarityFilter = document.querySelector("#rarity-filter");
 const typeFilter = document.querySelector("#type-filter");
+// The kind filter is kept separately because it is represented by buttons.
 let activeFilter = "all";
 
+// Populate the summary counts before the first catalog render.
 document.querySelector("#all-count").textContent = String(cards.length).padStart(2, "0");
 document.querySelector("#creature-count").textContent = String(cards.filter((card) => card.kind === "creature").length).padStart(2, "0");
 document.querySelector("#spell-count").textContent = String(cards.filter((card) => card.kind === "spell").length).padStart(2, "0");
 
 function renderCards() {
+  // Apply the active filters and sort choice before rebuilding the card grid.
   const query = searchInput.value.trim().toLowerCase();
   const visibleCards = cards
     .filter((card) => activeFilter === "all" || card.kind === activeFilter)
@@ -29,6 +33,7 @@ function renderCards() {
     });
 
   resultCount.textContent = String(visibleCards.length).padStart(2, "0");
+  // Build each card with its art, metadata, stats, and descriptive text.
   grid.innerHTML = visibleCards.map((card) => {
     const isAtWill = /^AW(?:\s|$)/.test(card.ability.trim());
     const ability = card.ability.replace(/^AW\s*/, "").trim();
@@ -36,9 +41,20 @@ function renderCards() {
     const typeChips = card.types.map((type) => `<span class="type-chip type-${type.toLowerCase()}">${type}</span>`).join("");
     const hasAbility = ability && ability.toLowerCase() !== "n/a";
 
+// Map card types to the folders that contain their artwork.
+const imageFolders = { Bug: "PNG - Bug", Beast: "PNG - Beast", Light: "PNG - Light", Dark: "PNG - Dark" };
+
+// Return the browser-safe path for a card's image asset.
+function getCardImagePath(card) {
+  const folder = imageFolders[card.types[0]];
+  const filename = encodeURIComponent(`${card.number} - ${card.image}.png`);
+  return `Items/PNGs/${folder}/PNG/${filename}`;
+}
     return `
     <article class="card-item ${rarityClass}">
       <div class="card-art ${card.color}" data-symbol="${card.symbol}" role="img" aria-label="Card image for ${card.image}">
+        <img class="card-image" src="${getCardImagePath(card)}" alt="${card.image}" onerror="this.hidden = true; this.nextElementSibling.hidden = false" />
+        <span class="image-coming-soon" hidden>Image coming soon</span>
       </div>
       <div class="card-info">
         <div class="card-header"><h3>${card.name}</h3></div>
@@ -53,6 +69,7 @@ function renderCards() {
   emptyState.hidden = visibleCards.length !== 0;
 }
 
+// Re-render when the kind filter changes.
 document.querySelectorAll(".filter-button").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelector(".filter-button.active").classList.remove("active");
@@ -62,6 +79,7 @@ document.querySelectorAll(".filter-button").forEach((button) => {
   });
 });
 
+// Search, select filters, and keyboard shortcut all share the same renderer.
 searchInput.addEventListener("input", renderCards);
 sortSelect.addEventListener("change", renderCards);
 rarityFilter.addEventListener("change", renderCards);
