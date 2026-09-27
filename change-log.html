@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="HandBound TCG rules and card change history." />
+  <title>HandBound TCG | Change Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Shared site shell and development history content. -->
+  <div class="site-shell">
+    <!-- Global brand and navigation. -->
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="HandBound TCG home"><span class="brand-mark" aria-hidden="true">HB</span><span class="brand-name">HandBound <em>TCG</em></span></a>
+      <nav class="site-nav" aria-label="Main navigation"><a class="nav-link" href="index.html">Home</a><a class="nav-link" href="archive.html">Card archive</a><a class="nav-link" href="deck-builder.html">Deck Builder</a><a class="nav-link" href="change-log.html">Change Log</a><a class="nav-link" href="about.html">About</a><a class="nav-link coming-soon-link" href="store.html">Store <span>soon</span></a></nav>
+      <div class="header-status"><i></i> Version history <span>/</span> 0.6.0</div>
+    </header>
+
+    <!-- Rules timeline and filterable card revision history. -->
+    <main>
+      <section class="archive-page-heading changelog-heading">
+        <p class="eyebrow">HandBound development record <span>·</span> Current release 0.6.0</p>
+        <h1>Change <em>log</em></h1>
+        <p>Rules and card revisions, kept in order so every update has a paper trail.</p>
+      </section>
+
+      <section class="changelog-section" aria-labelledby="rules-history-heading">
+        <div class="section-heading"><div><p class="eyebrow">Rules history</p><h2 id="rules-history-heading">How the game <em>changed</em></h2></div><p class="section-note">From the 0.3.0 foundation<br />to the 0.6.0 rulebook.</p></div>
+        <div id="rules-timeline" class="rules-timeline"></div>
+      </section>
+
+      <section class="changelog-section changed-cards-section" aria-labelledby="changed-cards-heading">
+        <div class="section-heading"><div><p class="eyebrow">Card history</p><h2 id="changed-cards-heading">Card updates and balance changes</h2></div><p class="section-note"><strong id="changed-card-count">0</strong> documented card revisions<br />Click a card for the full data.</p></div>
+        <div class="changed-card-controls" aria-label="Sort and filter changed cards">
+          <label class="select-filter">Sort<select id="change-sort" aria-label="Sort changed cards"><option value="default">Card Number</option><option value="new-first">New first</option><option value="buff-first">Buffs first</option><option value="nerf-first">Nerfs first</option></select></label>
+          <label class="select-filter">Type<select id="change-type-filter" aria-label="Filter by card type"><option value="all">All types</option><option value="Bug">Bug</option><option value="Beast">Beast</option><option value="Light">Light</option><option value="Dark">Dark</option></select></label>
+        </div>
+        <div id="changed-card-grid" class="changed-card-grid"></div>
+      </section>
+    </main>
+
+    <!-- Modal detail view for a selected card revision. -->
+    <dialog id="card-change-dialog" class="card-change-dialog" aria-labelledby="card-change-content">
+      <button class="dialog-close" type="button" data-close-dialog aria-label="Close card details">×</button>
+      <div id="card-change-content" class="card-change-content"></div>
+    </dialog>
+    <footer class="site-footer"><span>HANDBOUND TCG</span><span>Change Log · 0.6.0</span><span>Made for the table</span></footer>
+  </div>
+  <!-- Load shared cards, revision data, then the change-log renderer. -->
+  <script src="cards-data.js"></script><script src="change-log-data.js"></script><script src="change-log.js"></script>
+</body>
+</html>
