@@ -52,7 +52,11 @@
         <div class="empty-state" id="empty-state" hidden><span>∅</span><h3>No cards found</h3><p>Try another search or clear your filters.</p></div>
       </section>
     </main>
-    <footer class="site-footer"><span>HANDBOUND TCG</span><span>The First 200 · 2026</span><span>Made for the table</span></footer>
+    <dialog class="archive-card-dialog" id="archive-card-dialog" aria-label="Card details">
+      <button class="archive-card-close" type="button" aria-label="Close card details">×</button>
+      <div id="archive-card-detail"></div>
+    </dialog>
+    <footer class="site-footer"><span>HANDBOUND TCG</span><span>The First 200 · 2026</span><span>Where your hand is everything</span></footer>
   </div>
   <!-- Load card data before the archive renderer. -->
   <script src="cards-data.js"></script><script src="app.js"></script>

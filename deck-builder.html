@@ -26,12 +26,12 @@
     <main>
       <section class="builder-heading">
         <p class="eyebrow">Build for the table <span>·</span> Local deck lab</p>
-        <h1>Make your <em>deck</em></h1>
-        <p>Declare a type, fill your rarity slots, and save a deck to this device.</p>
+        <h1>Make your <em>Deck</em></h1>
+        <p>Declare a type, fill your rarity slots, save your deck to this device, and share it with others.</p>
       </section>
 
       <section class="builder-start" id="builder-start">
-        <div class="builder-step"><span>01</span><div><p class="eyebrow">Choose your foundation</p><h2>Create New Deck</h2><p>Every card in a deck must share its declared type.</p></div><button class="gold-button" id="create-deck-button">Create New Deck</button></div>
+        <div class="builder-step"><span>01</span><div><p class="eyebrow">Choose your foundation</p><h2>Create New Deck</h2><p>Every card in a deck must share its declared type.</p></div><div class="builder-start-actions"><button class="gold-button" id="create-deck-button">Create New Deck</button><button class="outline-button" id="import-deck-button">Import deck</button></div></div>
         <div class="type-choice-grid" id="type-choice-grid" role="group" aria-label="Choose a deck type" hidden>
           <button class="deck-type-button" data-deck-type="Bug"><span class="type-chip type-bug">Bug</span><small>50 cards</small></button>
           <button class="deck-type-button" data-deck-type="Beast"><span class="type-chip type-beast">Beast</span><small>50 cards</small></button>
@@ -79,7 +79,30 @@
         <div class="builder-message" id="builder-message" role="status" aria-live="polite"></div>
       </section>
     </main>
-    <footer class="site-footer"><span>HANDBOUND TCG</span><span>Deck Lab · Beta</span><span>Made for the table</span></footer>
+    <dialog class="deck-key-dialog" id="share-deck-dialog" aria-labelledby="share-deck-title">
+      <form method="dialog" class="deck-key-dialog-shell">
+        <button class="deck-key-close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow">Share deck</p>
+        <h2 id="share-deck-title">Copy this deck key</h2>
+        <p class="deck-key-description">Send this key to your friend to share your deck.</p>
+        <label class="deck-key-label" for="share-deck-key">Deck key</label>
+        <textarea id="share-deck-key" rows="4" readonly spellcheck="false"></textarea>
+        <div class="deck-key-actions"><button class="outline-button" type="button" id="copy-deck-key-button">Copy key</button><button class="gold-button" value="cancel">Done</button></div>
+        <p class="deck-key-status" id="share-deck-status" role="status" aria-live="polite"></p>
+      </form>
+    </dialog>
+    <dialog class="deck-key-dialog" id="import-deck-dialog" aria-labelledby="import-deck-title">
+      <form method="dialog" class="deck-key-dialog-shell" id="import-deck-form">
+        <button class="deck-key-close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow">Import deck</p>
+        <h2 id="import-deck-title">Paste Deck Key</h2>
+        <label class="deck-key-label" for="import-deck-key">Deck key</label>
+        <textarea id="import-deck-key" rows="4" spellcheck="false" autocomplete="off" required></textarea>
+        <div class="deck-key-actions"><button class="outline-button" type="button" id="cancel-import-deck-button">Cancel</button><button class="gold-button" type="submit">Import deck</button></div>
+        <p class="deck-key-status" id="import-deck-status" role="status" aria-live="polite"></p>
+      </form>
+    </dialog>
+    <footer class="site-footer"><span>HANDBOUND TCG</span><span>Deck Lab · Beta</span><span>Where your hand is everything</span></footer>
   </div>
   <!-- Load card data before the deck-builder logic. -->
   <script src="cards-data.js"></script><script src="deck-builder.js"></script>

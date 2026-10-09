@@ -49,6 +49,92 @@ function promptSavedDeckLimit() {
   window.alert(`You already have ${savedDeckLimit} saved decks. Delete a deck first to create another.`);
 }
 
+function calculateDeckKeyChecksum(bytes) {
+  return bytes.reduce((checksum, byte) => (checksum * 31 + byte) & 0xffff, 0);
+}
+
+function encodeDeckKey(deck) {
+  const typeCodes = { Bug: 0, Beast: 1, Light: 2, Dark: 3 };
+  const bytes = [1, typeCodes[deck.type], deck.main.length, deck.side.length];
+  [...deck.main, ...deck.side].forEach((number) => {
+    const code = Number(number);
+    bytes.push((code >> 16) & 0xff, (code >> 8) & 0xff, code & 0xff);
+  });
+  const checksum = calculateDeckKeyChecksum(bytes);
+  bytes.push(checksum >> 8, checksum & 0xff);
+  let binary = "";
+  bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+  return `HB1-${btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "")}`;
+}
+
+function decodeDeckKey(rawKey) {
+  const match = /^HB1-([A-Za-z0-9_-]+)$/.exec(rawKey.trim());
+  if (!match) throw new Error("Enter a valid HB1 deck key.");
+  const encoded = match[1].replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(encoded + "=".repeat((4 - encoded.length % 4) % 4));
+  const bytes = Array.from(binary, (character) => character.charCodeAt(0));
+  if (bytes.length < 10 || bytes[0] !== 1) throw new Error("This deck key version is not supported.");
+
+  const type = ["Bug", "Beast", "Light", "Dark"][bytes[1]];
+  const mainLength = bytes[2];
+  const sideLength = bytes[3];
+  if (!type || mainLength !== 25 || sideLength > 5 || bytes.length !== 4 + (mainLength + sideLength) * 3 + 2) {
+    throw new Error("This key does not describe a valid 25-card deck and sideboard.");
+  }
+
+  const payload = bytes.slice(0, -2);
+  const expectedChecksum = calculateDeckKeyChecksum(payload);
+  if (bytes.at(-2) !== (expectedChecksum >> 8) || bytes.at(-1) !== (expectedChecksum & 0xff)) {
+    throw new Error("This deck key is incomplete or has been changed.");
+  }
+
+  const cardNumbers = [];
+  for (let index = 4; index < bytes.length - 2; index += 3) {
+    const number = ((bytes[index] << 16) | (bytes[index + 1] << 8) | bytes[index + 2]).toString().padStart(7, "0");
+    const card = findCard(number);
+    if (!card) throw new Error(`This deck key refers to unknown card ${number}.`);
+    if (!card.types.includes(type)) throw new Error(`${card.name} does not match the deck's declared ${type} type.`);
+    cardNumbers.push(number);
+  }
+
+  const main = cardNumbers.slice(0, mainLength);
+  const side = cardNumbers.slice(mainLength);
+  if ([...new Set(cardNumbers)].some((number) => totalCopyCountFor(number, main, side) > 2)) {
+    throw new Error("This deck contains more than two copies of a card.");
+  }
+  if (!allocateSlots(main).assignments.every(Boolean)) throw new Error("This deck exceeds the rarity slot limits.");
+  return { type, main, side };
+}
+
+function totalCopyCountFor(number, main, side) {
+  return main.filter((cardNumber) => cardNumber === number).length + side.filter((cardNumber) => cardNumber === number).length;
+}
+
+function shareSavedDeck(index) {
+  const deck = JSON.parse(localStorage.getItem(savedDecksKey) || "[]")[index];
+  if (!deck) return;
+  document.querySelector("#share-deck-key").value = encodeDeckKey(deck);
+  document.querySelector("#share-deck-status").textContent = "";
+  document.querySelector("#share-deck-dialog").showModal();
+}
+
+function importDeck() {
+  document.querySelector("#import-deck-key").value = "";
+  document.querySelector("#import-deck-status").textContent = "";
+  document.querySelector("#import-deck-dialog").showModal();
+  document.querySelector("#import-deck-key").focus();
+}
+
+function saveImportedDeck(key) {
+  const saved = JSON.parse(localStorage.getItem(savedDecksKey) || "[]");
+  if (saved.length >= savedDeckLimit) return promptSavedDeckLimit();
+  const deck = decodeDeckKey(key);
+  saved.unshift({ ...deck, name: "Imported Deck", favorite: false, savedAt: new Date().toISOString() });
+  localStorage.setItem(savedDecksKey, JSON.stringify(saved));
+  renderSavedDecks();
+  setMessage("Imported deck saved to this device.");
+}
+
 function cardsOfType() {
   // Decks may only use cards matching the declared type.
   return cards.filter((card) => card.types.includes(deckType));
@@ -144,7 +230,7 @@ function renderSavedDecks() {
     .map(({ deck, index }) => {
       const safeName = escapeHTML(deck.name || "Untitled deck");
       const isFavorite = Boolean(deck.favorite);
-      return `<div class="saved-deck"><button class="saved-deck-load" data-load-deck="${index}"><strong>${safeName}</strong><span>${escapeHTML(deck.type)} · ${deck.main.length}/25 main · ${deck.side.length}/5 side</span></button><button class="saved-deck-view" data-view-deck="${index}">View deck</button><button class="saved-deck-favorite${isFavorite ? " is-favorite" : ""}" type="button" data-favorite-deck="${index}" aria-label="${isFavorite ? "Remove" : "Add"} ${safeName} ${isFavorite ? "from" : "to"} favorites" aria-pressed="${isFavorite}">★</button><button class="saved-deck-delete" data-delete-deck="${index}" aria-label="Delete ${safeName}">Delete</button></div>`;
+      return `<div class="saved-deck"><button class="saved-deck-load" data-load-deck="${index}"><strong>${safeName}</strong><span>${escapeHTML(deck.type)} · ${deck.main.length}/25 main · ${deck.side.length}/5 side</span></button><button class="saved-deck-view" data-view-deck="${index}">View deck</button><button class="saved-deck-share" type="button" data-share-deck="${index}">Share deck</button><button class="saved-deck-favorite${isFavorite ? " is-favorite" : ""}" type="button" data-favorite-deck="${index}" aria-label="${isFavorite ? "Remove" : "Add"} ${safeName} ${isFavorite ? "from" : "to"} favorites" aria-pressed="${isFavorite}">★</button><button class="saved-deck-delete" data-delete-deck="${index}" aria-label="Delete ${safeName}">Delete</button></div>`;
     }).join("") || `<p class="muted-note">Saved decks live on this device.</p>`;
   const savedLobby = document.querySelector("#saved-decks-lobby");
   const savedLobbyCount = document.querySelector("#saved-lobby-count");
@@ -343,6 +429,33 @@ function deleteDeck(index) {
 function renderAll() { renderSlots(); renderPicker(); renderPickerDeckViewer(); renderSavedDecks(); }
 typeButtons.forEach((button) => button.addEventListener("click", () => startBuilder(button.dataset.deckType)));
 document.querySelector("#create-deck-button").addEventListener("click", () => { if (JSON.parse(localStorage.getItem(savedDecksKey) || "[]").length >= savedDeckLimit) return promptSavedDeckLimit(); typeChoiceGrid.hidden = false; document.querySelector("#create-deck-button").hidden = true; });
+document.querySelector("#import-deck-button").addEventListener("click", importDeck);
+document.querySelector("#cancel-import-deck-button").addEventListener("click", () => document.querySelector("#import-deck-dialog").close());
+document.querySelector("#import-deck-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const status = document.querySelector("#import-deck-status");
+  try {
+    saveImportedDeck(document.querySelector("#import-deck-key").value);
+    document.querySelector("#import-deck-dialog").close();
+  } catch (error) {
+    status.textContent = error.message || "Unable to import this deck key.";
+    status.classList.add("is-error");
+  }
+});
+document.querySelector("#copy-deck-key-button").addEventListener("click", async () => {
+  const keyInput = document.querySelector("#share-deck-key");
+  const status = document.querySelector("#share-deck-status");
+  keyInput.focus();
+  keyInput.select();
+  try {
+    await navigator.clipboard.writeText(keyInput.value);
+    status.textContent = "Deck key copied.";
+    status.classList.remove("is-error");
+  } catch {
+    status.textContent = "Key selected. Press Ctrl+C to copy it.";
+    status.classList.remove("is-error");
+  }
+});
 document.querySelector("#new-deck-button").addEventListener("click", () => { if (JSON.parse(localStorage.getItem(savedDecksKey) || "[]").length >= savedDeckLimit) return promptSavedDeckLimit(); editingDeckIndex = null; viewer.hidden = true; workspace.hidden = true; document.querySelector("#builder-start").hidden = false; typeChoiceGrid.hidden = true; document.querySelector("#create-deck-button").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" }); });
 document.querySelector("#save-deck-button").addEventListener("click", saveDeck);
 document.querySelector("#view-saved-deck-button").addEventListener("click", () => loadDeck(editingDeckIndex));
@@ -357,7 +470,7 @@ pickerDeckViewer.addEventListener("click", (event) => {
   removeCard(removeButton.dataset.removeCard, removeButton.dataset.removeTarget);
 });
 pickerList.addEventListener("click", (event) => { const main = event.target.closest("[data-add-main]"); const side = event.target.closest("[data-add-side]"); const removeMain = event.target.closest("[data-remove-main]"); const removeSide = event.target.closest("[data-remove-side]"); if (main) addCard(main.dataset.addMain, "main"); if (side) addCard(side.dataset.addSide, "side"); if (removeMain) removeCard(removeMain.dataset.removeMain, "main"); if (removeSide) removeCard(removeSide.dataset.removeSide, "side"); });
-document.querySelector("#saved-decks-lobby").addEventListener("click", (event) => { const favoriteButton = event.target.closest("[data-favorite-deck]"); if (favoriteButton) { event.stopPropagation(); toggleDeckFavorite(Number(favoriteButton.dataset.favoriteDeck)); return; } const deleteButton = event.target.closest("[data-delete-deck]"); if (deleteButton) { event.stopPropagation(); if (window.confirm("Are you sure you want to delete this deck?")) deleteDeck(Number(deleteButton.dataset.deleteDeck)); return; } const viewButton = event.target.closest("[data-view-deck]"); if (viewButton) { loadDeck(Number(viewButton.dataset.viewDeck)); return; } const button = event.target.closest("[data-load-deck]"); if (button) loadDeck(Number(button.dataset.loadDeck)); });
+document.querySelector("#saved-decks-lobby").addEventListener("click", (event) => { const shareButton = event.target.closest("[data-share-deck]"); if (shareButton) { event.stopPropagation(); shareSavedDeck(Number(shareButton.dataset.shareDeck)); return; } const favoriteButton = event.target.closest("[data-favorite-deck]"); if (favoriteButton) { event.stopPropagation(); toggleDeckFavorite(Number(favoriteButton.dataset.favoriteDeck)); return; } const deleteButton = event.target.closest("[data-delete-deck]"); if (deleteButton) { event.stopPropagation(); if (window.confirm("Are you sure you want to delete this deck?")) deleteDeck(Number(deleteButton.dataset.deleteDeck)); return; } const viewButton = event.target.closest("[data-view-deck]"); if (viewButton) { loadDeck(Number(viewButton.dataset.viewDeck)); return; } const button = event.target.closest("[data-load-deck]"); if (button) loadDeck(Number(button.dataset.loadDeck)); });
 document.querySelector("#viewer-edit-button").addEventListener("click", () => { viewer.hidden = true; workspace.hidden = false; document.querySelector("#builder-start").hidden = true; document.querySelector("#declared-type-label").textContent = deckType; document.querySelector("#deck-name-input").value = JSON.parse(localStorage.getItem(savedDecksKey) || "[]")[editingDeckIndex].name; renderAll(); });
 document.querySelector("#viewer-return-button").addEventListener("click", () => { viewer.hidden = true; document.querySelector("#builder-start").hidden = false; typeChoiceGrid.hidden = true; document.querySelector("#create-deck-button").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" }); });
 document.querySelector("#editor-return-button").addEventListener("click", () => { viewer.hidden = true; workspace.hidden = true; document.querySelector("#builder-start").hidden = false; typeChoiceGrid.hidden = true; document.querySelector("#create-deck-button").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" }); });
